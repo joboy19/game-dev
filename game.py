@@ -11,8 +11,6 @@ def read_level(filen):
                 grid[x[0]].append(y)
     return grid
 
-    
-
 win_height = 400
 win_width = 608
 display = (win_width, win_height)
@@ -24,7 +22,7 @@ screen = pygame.display.set_mode(display, 0, 32)
 clock = pygame.time.Clock()
 
 background = pygame.image.load("img//background.png")
-player = pygame.image.load("img//player.png")
+player = pygame.image.load("img//player_tri.png")
 player.set_colorkey((255,255,255))
 grass = pygame.image.load("img//grass.png")
 dirt = pygame.image.load("img//dirt.png")
@@ -89,15 +87,15 @@ while True:
         player_move_tick[0] += 3
     
     player_vert_mom += 0.2
-    if player_vert_mom > 2:
-        player_vert_mom = 2
+    if player_vert_mom > 3:
+        player_vert_mom = 3
 
     player_move_tick[1] += player_vert_mom
 
     for event in pygame.event.get():
 
         if event.type == QUIT:
-            print("Quitting...")
+            print("Game quit.")
             pygame.quit()
             sys.exit()
 
