@@ -1,5 +1,6 @@
 import pygame, sys
 import random as r
+import math as math
 
 
 
@@ -29,8 +30,13 @@ class Item():
             screen.blit(book1, (self.pos[0]-scroll[0], self.pos[1]-scroll[1]))
         if self.typee == "H":
             screen.blit(heart, (self.pos[0]-scroll[0], self.pos[1]-scroll[1]))
-        if self.typee == "T1":
+        if self.typee.startswith("T"):
             screen.blit(treasure1, (self.pos[0]-scroll[0], self.pos[1]-scroll[1]))
+        if self.typee.startswith("P"):
+            screen.blit(page_img, (self.pos[0]-scroll[0], self.pos[1]-scroll[1]))
+        if self.typee == "G":
+            screen.blit(gold_heart_img, (self.pos[0]-scroll[0], self.pos[1]-scroll[1]))
+            
         
     def collide_player(self, player, game):
         if self.visable == False:
@@ -38,14 +44,89 @@ class Item():
         self.visable = False
         if self.typee == "B":
             player.current_items[0] = True
-            return ["Learnt new skill: Knowledge Casting", 60]
+            return ["Book of Knowledge! Press SPACE.", 60]
         if self.typee == "H":
             player.player_health = min(player.player_health + 15, player.player_max_health)
             return ["Gained 15 health", 60]
+        if self.typee == "T0":
+            game.level_data[1] = True
+            if game.level_data == [True, True]:
+                game.update_level(1, player)
+                return ["Congradulations, you have completed level 1!", 60]#
+            else:
+                return ["Now you need the knowledge page!", 60]
+        if self.typee == "P0":
+            player.upgrade_player(1)
+            game.level_data[0] = True
+            if game.level_data == [True, True]:
+                game.update_level(1, player)
+                return ["Congradulations, you have completed level 1!", 60]#
+            else:
+                return ["Now you need the treasure!", 60]
         if self.typee == "T1":
-            game.update_level(1, player)
-            return ["Congradulations, you have completed level 1!", 60]
+            game.level_data[1] = True
+            if game.level_data == [True, True]:
+                game.update_level(2, player)
+                return ["Congradulations, you have completed level 2!", 60]#
+            else:
+                return ["Now you need the knowledge page!", 60]
+        if self.typee == "P1":
+            player.upgrade_player(1)
+            game.level_data[0] = True
+            if game.level_data == [True, True]:
+                game.update_level(2, player)
+                return ["Congradulations, you have completed level 2!", 60]#
+            else:
+                return ["Now you need the treasure!", 60]
+        if self.typee == "T2":
+            game.level_data[1] = True
+            if game.level_data == [True, True]:
+                game.update_level(2, player)
+                return ["Congradulations, you have completed level 3!", 60]#
+            else:
+                return ["Now you need the knowledge page!", 60]
+        if self.typee == "P2":
+            player.upgrade_player(1)
+            game.level_data[0] = True
+            if game.level_data == [True, True]:
+                game.update_level(2, player)
+                return ["Congradulations, you have completed level 3!", 60]#
+            else:
+                return ["Now you need the treasure!", 60]
+        if self.typee == "T3":
+            game.level_data[1] = True
+            if game.level_data == [True, True]:
+                game.update_level(2, player)
+                return ["Congradulations, you have completed level 4!", 60]#
+            else:
+                return ["Now you need the knowledge page!", 60]
+        if self.typee == "P3":
+            player.upgrade_player(1)
+            game.level_data[0] = True
+            if game.level_data == [True, True]:
+                game.update_level(2, player)
+                return ["Congradulations, you have completed level 4!", 60]#
+            else:
+                return ["Now you need the treasure!", 60]
+
+        if self.typee == "G":
+            player.upgrade_player(2)
         return [None]
+
+class HUD():
+    def __init__(self):
+        self.display = True
+    def draw(self, screen, player):
+        myfont = pygame.font.SysFont("Helvetica", 15, bold=True)
+        letter = myfont.render("Level: " + str(player.current_level),0,(0,0,0))
+        screen.blit(letter,(0,15))
+        letter = myfont.render("Health: " + str(player.player_health) + "/" + str(player.player_max_health),0,(0,0,0))
+        screen.blit(letter,(0,30))
+        letter = myfont.render("Damage: " + str(player.player_dmg),0,(0,0,0))
+        screen.blit(letter,(0,45))
+        
+
+
 
 class Player():
     def __init__(self):
@@ -66,12 +147,34 @@ class Player():
         self.shooting_time = 0
         
         self.projectiles = []
+        self.messages = []
+    
+    def upgrade_player(self, typee):
+        if typee == 1:
+            self.player_dmg *= 2
+            self.messages.append(["Your damage has increase!", 60])
+        if typee == 2:
+            self.player_max_health += 25
+            self.messages.append(["Your max health has increase!", 60])
     
     def shoot_proj(self):
-        self.shooting_time = 20
-        if self.current_items[0]:
-            self.projectiles.append(Projectile("purple", (self.player_rect.x + 8, self.player_rect.y + 12), self.facing_right, 5))
+        if len(self.projectiles) >= 3:
+            self.messages.append(["You can only shoot 3 bullets at once", 10])
             return
+        if self.current_items[0]:
+            self.shooting_time = 20
+            self.projectiles.append(Projectile("purple", (self.player_rect.x + 8, self.player_rect.y + 12), self.facing_right, 5, self.player_dmg))
+            return
+    
+    def render_messages(self, screen, scroll):
+        myfont = pygame.font.SysFont("Arial", 10)
+        for x in enumerate(self.messages):
+            letter = myfont.render(x[1][0],0,(0,0,0))
+            screen.blit(letter, (self.player_rect.x - scroll[0] + 18, self.player_rect.y - scroll[1] + x[0]*10))
+            x[1][1] -= 1
+        for x in self.messages:
+            if x[1] < 0:
+                self.messages.pop(self.messages.index(x))
     
 
     def do_tick_and_render(self, level_tiles, level_items, level_enemies, scroll, screen, game):
@@ -104,21 +207,24 @@ class Player():
         colliding_items = check_item_collisions(self.player_rect, level_items)
         for x in colliding_items:
             new_message = level_items[x].collide_player(self, game)
-            messages.append(new_message)
+            if new_message != [None]:
+                self.messages.append(new_message)
 
         colliding_enemies = check_enemy_collisions(self.player_rect, level_enemies)
         for x in colliding_enemies:
             new_message = level_enemies[x].collide_player(self)
-            messages.append(new_message)
+            if new_message != [None]:
+                self.messages.append(new_message)
         
         
         
         for x in self.projectiles:
-            x.update_and_render(screen, level_enemies, scroll)
+            if not x.update_and_render(screen, level_enemies, level_tiles, scroll):
+                self.projectiles.pop(self.projectiles.index(x))
         
         if self.player_health <= 0:
-            messages = []
-            messages.append(["Oh dear, you have died!", 60])
+            self.messages = []
+            self.messages.append(["Oh dear, you have died!", 60])
             self.level_start(self.current_level)
             game.update_level(self.current_level, self)
         
@@ -139,7 +245,8 @@ class Player():
             else:
                 screen.blit(pygame.transform.flip(player_img, True, False), (self.player_rect.x - scroll[0], self.player_rect.y - scroll[1]))
         
-        return messages
+        self.render_messages(screen, scroll)
+        return
     
     def level_start(self, level):
         self.player_health = int(self.player_max_health)
@@ -175,14 +282,38 @@ class Red_Enemy():
         self.moving_right = False
         self.vert_mom = False
         self.wait_timer = 0
+        self.messages = []
+        self.particles = []
         
     def render(self, scroll, img, screen):
         screen.blit(img, (self.rect.x - scroll[0], self.rect.y - scroll[1]))
+    
+    def hit(self, damage):
+        self.health -= damage
+        self.messages = []
+        self.messages.append(["Health: " + str(self.health), 10])
+        self.wait_time = 10
+        for x in range(10):
+            self.particles.append(Magic_Particle((self.rect.x, self.rect.y+16), (128, 0, 128)))
+    
+    def render_messages(self, screen, scroll):
+        myfont = pygame.font.SysFont("Arial", 10)
+        for x in enumerate(self.messages):
+            letter = myfont.render(x[1][0],0,(0,0,0))
+            screen.blit(letter, (self.rect.x - scroll[0] + 18, self.rect.y - scroll[1] + x[0]*10))
+            x[1][1] -= 1
+        for x in self.messages:
+            if x[1] < 0:
+                self.messages.pop(self.messages.index(x))
 
     def update_and_render(self, scroll, player, screen, level_tiles):
+        if self.health <= 0:
+            self.alive = False
         if not self.alive:
-            return
-        if dist_to_player(self, player) < 400:   
+            return False
+        if dist_to_player(self, player) == 400:
+            self.messages.append(["You will not get our knowledge!", 120])
+        if dist_to_player(self, player) <= 400:   
             move_tick = [0, 0]     
             move_right = next_move_right(self, player)
             if self.wait_timer == 0:
@@ -216,16 +347,123 @@ class Red_Enemy():
                 self.render(scroll, red_enemy_img, screen)
             else:
                 self.render(scroll, pygame.transform.flip(red_enemy_img, True, False), screen)
+        
+        
+        for x in self.particles:
+            if not x.update(screen, scroll):
+                self.particles.pop(self.particles.index(x))
+        
+        self.render_messages(screen, scroll)
+        return True
     
     def collide_player(self, player):
-        player.player_health -= 2
+        player.player_health -= self.damage
         if player.moving_right:
             player.player_horz_mom -= 3
         else:
             player.player_horz_mom += 3
         self.wait_timer = 30
         
-        return [r.choice(["Ouch", "Yikes", "Oof", "Oueh", "Big oof"]), 30]
+        return [r.choice(["Ouch", "Yikes", "Oof", "Oueh"]), 30]
+
+class Blue_Enemy():
+    def __init__(self, pos):
+        self.pos = pos
+        self.rect = pygame.Rect(pos[0], pos[1], 16, 32)
+        self.alive = True
+        self.in_air = False
+        self.health = 50
+        self.damage = 1
+        self.moving_left = False
+        self.moving_right = False
+        self.vert_mom = False
+        self.wait_timer = 0
+        self.messages = []
+        self.particles = []
+        
+    def render(self, scroll, img, screen):
+        screen.blit(img, (self.rect.x - scroll[0], self.rect.y - scroll[1]))
+    
+    def hit(self, damage):
+        self.health -= damage
+        self.messages = []
+        self.messages.append(["Health: " + str(self.health), 10])
+        self.wait_time = 10
+        for x in range(10):
+            self.particles.append(Magic_Particle((self.rect.x, self.rect.y+16), (128, 0, 128)))
+    
+    def render_messages(self, screen, scroll):
+        myfont = pygame.font.SysFont("Arial", 10)
+        for x in enumerate(self.messages):
+            letter = myfont.render(x[1][0],0,(0,0,0))
+            screen.blit(letter, (self.rect.x - scroll[0] + 18, self.rect.y - scroll[1] + x[0]*10))
+            x[1][1] -= 1
+        for x in self.messages:
+            if x[1] < 0:
+                self.messages.pop(self.messages.index(x))
+
+    def update_and_render(self, scroll, player, screen, level_tiles):
+        if self.health <= 0:
+            self.alive = False
+        if not self.alive:
+            return False
+        if dist_to_player(self, player) == 400:
+            self.messages.append(["How dare you step foot here!", 120])
+        if dist_to_player(self, player) <= 400:   
+            move_tick = [0, 0]     
+            move_right = next_move_right(self, player)
+            if self.wait_timer == 0:
+                if move_right:
+                    self.moving_right = True
+                    move_tick[0] += 1
+                else:
+                    self.moving_right = False
+                    move_tick[0] -= 1
+                
+                self.vert_mom += 0.2
+                self.vert_mom = min(self.vert_mom, 3)
+                self.vert_mom = max(self.vert_mom, -2)
+            else:
+                self.wait_timer -= 1
+        
+            move_tick[1] += self.vert_mom
+
+            self.rect, collisions = check_collision_and_move(self.rect, [x.rect for x in level_tiles], move_tick)
+
+            self.in_air = not collisions[1]
+            if collisions[2] or collisions[3]:
+                self.vert_mom -= 5
+        
+        
+        if self.in_air:
+            if self.moving_right:
+                self.render(scroll, blue_enemy_fall_img, screen)
+            else:
+                self.render(scroll, pygame.transform.flip(blue_enemy_fall_img, True, False), screen)
+        else:
+            if self.moving_right:
+                self.render(scroll, blue_enemy_img, screen)
+            else:
+                self.render(scroll, pygame.transform.flip(blue_enemy_img, True, False), screen)
+        
+        
+        for x in self.particles:
+            if not x.update(screen, scroll):
+                self.particles.pop(self.particles.index(x))
+        
+        self.render_messages(screen, scroll)
+        return True
+    
+    def collide_player(self, player):
+        player.player_health -= self.damage
+        if player.moving_right:
+            player.player_horz_mom -= 3
+        else:
+            player.player_horz_mom += 3
+        self.wait_timer = 30
+        
+        return [r.choice(["Ouch", "Yikes", "Oof", "Oueh"]), 30]
+
 
         
 def dist_to_player(enemy, player):
@@ -252,15 +490,18 @@ class Button():
             return True
 
 class Projectile():
-    def __init__(self, typee, pos, facing_right, speed):
+    def __init__(self, typee, pos, facing_right, speed, damage):
         self.pos = pos
         self.rect = pygame.Rect(pos[0], pos[1], 7, 7)
         self.typee = typee
         self.facing_right = True
+        self.damage = damage
         if facing_right:
             self.speed = speed
         else:
             self.speed = -speed
+        self.alive = True
+        self.alive_time = 0
         
     
     def render(self, screen, scroll):
@@ -272,22 +513,56 @@ class Projectile():
 
         return
 
-    def update_and_render(self, screen, enemy_list, scroll):
+    def update_and_render(self, screen, level_enemies, level_tiles, scroll):
+        if not self.alive:
+            return False
+        if self.alive_time > 40:
+            self.alive = False
+            return False
         tick_move = self.speed
+
         colliding_enemies = check_enemy_collisions(self.rect, level_enemies)
-        messages = []
         for x in colliding_enemies:
-            new_message = level_enemies[x].collide_player(self)
-            messages.append(new_message)
+            level_enemies[x].hit(self.damage)
+            self.alive = False
+        
+        _, collision = check_collision_and_move(self.rect, [x.rect for x in level_tiles], (tick_move, 0))
+        if True in collision:
+            print("here")
+            self.alive = False
+
+
 
         self.rect.x += tick_move
         self.render(screen, scroll)
+        self.alive_time += 1
+        return True
 
+class Magic_Particle():
+    def __init__(self, location, colour):
+        self.x = location[0]
+        self.y = location[1]
+        angle = r.random()*6.28 - 3.14
+        self.weightx = math.sin(angle)
+        self.weighty = math.cos(angle)
+        self.colour = colour
+        self.timer = 50
+    def update(self, screen, scroll):
+        self.x += 0.4 * self.weightx
+        self.y += 0.4 * self.weighty
+        self.timer -= 1
+        if self.timer >= 0:
+            self.render(screen, scroll)
+            return True
+        return False
+    def render(self, screen, scroll):
+        pygame.draw.rect(screen, self.colour, pygame.Rect(self.x - scroll[0], self.y - scroll[1], 1, 2))
 
-
+        
 
 
 background_img = pygame.image.load("img//background.png")
+menu = pygame.image.load("img//menu.png")
 player_img = pygame.image.load("img//player.png")
 player_fall_img = pygame.image.load("img//player_fall.png")
 player_shoot_img = pygame.image.load("img//player_shoot.png")
@@ -296,10 +571,14 @@ dirt = pygame.image.load("img//dirt.png")
 book1 = pygame.image.load("img//book1.png")
 red_enemy_img = pygame.image.load("img//red_enemy.png")
 red_enemy_fall_img = pygame.image.load("img//red_enemy_fall.png")
+blue_enemy_img = pygame.image.load("img//blue_enemy.png")
+blue_enemy_fall_img = pygame.image.load("img//blue_enemy_fall.png")
 heart = pygame.image.load("img//heart.png")
+gold_heart_img = pygame.image.load("img//heart_gold.png")
 treasure1 = pygame.image.load("img//treasure1.png")
 quit_img = pygame.image.load("img//exit.png")
 purple_bullet_img = pygame.image.load("img//purple_bullet.png")
+page_img = pygame.image.load("img//page.png")
 
 current_level = 0
 level_tiles, level_items, level_enemies = [], [], []
@@ -317,12 +596,14 @@ class Game():
         self.win_width = 608
         self.display = (self.win_width, self.win_height)
 
-        self.level_file_names = ["levels//1.txt", "levels//2.txt"]
+        self.level_file_names = ["levels//1.txt", "levels//2.txt", "levels//3.txt"]
         self.screen = pygame.display.set_mode(self.display, 0, 32)
         self.clock = pygame.time.Clock()
 
         self.current_level = 0
         self.player = Player()
+
+        self.level_data = [False, False]
     
     def make_level_data(self, levelnum):
         level_data = self.read_level(levelnum)
@@ -345,10 +626,17 @@ class Game():
                 if y[1] == "H":
                     self.level_items.append(Item(y[1], (y[0]*16, x[0]*16)))
                 if y[1] == "T":
-                    self.level_items.append(Item("T1", (y[0]*16, x[0]*16)))
+                    self.level_items.append(Item("T" + str(levelnum), (y[0]*16, x[0]*16)))
+                if y[1] == "P":
+                    self.level_items.append(Item("P" + str(levelnum), (y[0]*16, x[0]*16)))
+                if y[1] == "G":
+                    self.level_items.append(Item(y[1], (y[0]*16, x[0]*16)))
+
                 #enemies
                 if y[1] == "R":
                     self.level_enemies.append(Red_Enemy((y[0]*16, x[0]*16)))
+                if y[1] == "J":
+                    self.level_enemies.append(Blue_Enemy((y[0]*16, x[0]*16)))
                     
 
     def read_level(self, levelnum):
@@ -381,9 +669,73 @@ class Game():
         player.player_rect.x = 300
         player.player_rect.y = 200
         player.level_start(level)
+        self.level_data = [False, False]
+    
+    def intro(self):
+        text = "The year is 2520, Durham and it's univserity has all but been destroyed. A cult of knowledge b-" \
+               "earers have set up a small but powerful civilisation within the ruins of the university and ha-" \
+               "ve stopped all access to what remains of the knowledge to the rest of the world. There is litt-" \
+               "le time before they can permanently seal off the knowledge to the rest of the world.           " \
+               "You are the last hope, before humanity loses all access to the knowledge left in the remains.  " \
+               "You must collect 5 hidden treasure chests, to use as a bribe and 5 hidden pages of knowledge,  " \
+               "well treasured by the cult, which can be placed in a book of knowledge which harnesses the     " \
+               "knowledge and lets you use them to fight back. Each page will make you stronger, 5 strong      " \
+               "enough to defeat their leader.                                                                 "
+        count = 95
+        myfont = pygame.font.SysFont("Arial", 15)
+        repeat = True
+        num_lines = 1
+            
+        while repeat:
+            if count == 0:
+                num_lines += 1
+                count = 95
+            elif num_lines <= 9:
+                count -= 1
+            
+
+            for x in range(num_lines):
+                letter = myfont.render(text[x*95:(x+1)*95-count],0,(255,255,255))
+                self.screen.blit(letter,(0,60 + (x*15)))
+
+            letter = myfont.render("[Press any key to skip]",0,(255,255,255))
+            self.screen.blit(letter,(0,0))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game()
+                if event.type == pygame.KEYDOWN:
+                    repeat = False
+            
+            pygame.display.update()
+            self.clock.tick(60)
+        
+        repeat = True
+        while repeat:
+            letter = myfont.render("[Press any key to start]",0,(255,255,255))
+            self.screen.blit(letter,(0,0))
+            self.screen.blit(menu, (0,0))
+
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.quit_game()
+                if event.type == pygame.KEYDOWN:
+                    repeat = False
+
+            pygame.display.update()
+            self.clock.tick(60)
+
+
+
+            
+            
+
 
     def main(self):
         pygame.display.set_caption("Treasure Hunter - Durham")
+
+        self.intro()
 
         self.set_up_buttons()
 
@@ -391,8 +743,9 @@ class Game():
         count = True
         self.make_level_data(0)
         master_scroll = [0, 0]
-        debug = True
+        debug = False
         myfont = pygame.font.SysFont("Arial", 10)
+        hud = HUD()
 
 
         while True:
@@ -408,15 +761,13 @@ class Game():
                 x.render(master_scroll, self.screen)
             
             for x in self.level_enemies:
-                x.update_and_render(master_scroll, self.player, self.screen, self.level_tiles)
+                if not x.update_and_render(master_scroll, self.player, self.screen, self.level_tiles):
+                    self.level_enemies.pop(self.level_enemies.index(x))
             
             for x in self.buttons:
                 x.render(self.screen)
             
-            new_messages = self.player.do_tick_and_render(self.level_tiles, self.level_items, self.level_enemies, master_scroll, self.screen, self)
-            for x in new_messages:
-                if x != [None]:
-                    messages.append(x)
+            self.player.do_tick_and_render(self.level_tiles, self.level_items, self.level_enemies, master_scroll, self.screen, self)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -475,29 +826,17 @@ class Game():
                 letter = myfont.render("items: " + str(self.player.current_items),0,(0,0,0))
                 self.screen.blit(letter,(0,60))
             
+            hud.draw(self.screen, self.player)
             
            
-            for x in enumerate(messages):
-                letter = myfont.render(x[1][0],0,(0,0,0))
-                self.screen.blit(letter, (self.player.player_rect.x - master_scroll[0] + 16, self.player.player_rect.y - master_scroll[1] + x[0]*10))
-                x[1][1] -= 1
             
-            for x in messages:
-                if x[1] < 0:
-                    messages.pop(messages.index(x))
+            
+            
             
 
             
             pygame.display.update()
             self.clock.tick(60)
-
-
-
-
-        
-
-       
-
 
 
 #check if colliding with list of tiles

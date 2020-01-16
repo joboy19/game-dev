@@ -1,14 +1,16 @@
 pygame todo:
-shooting-book >> ammo from picking up
+shooting-book >> upgrade with treasures
 new power-ups >> projectiles, shields, max_health upgrade
 enemies >> moving towards player, health (,drops, shooting back)
 goal >> powerup in each level >> make a choice
 
 order:
-get level ending done >> death restarts level
-buttons >> save, load (add game files with reader)
-shooting >> first item hitscan, projectiles too
-inventory >> display items on screen
+add power up choice (max_health + new pages(treasures))
+add start screen, telling story and what means what
+add second weapon type
+make level progressions
+make second enemy
+add better hud
 
 other:
 
