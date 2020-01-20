@@ -155,12 +155,11 @@ class HUD():
     def __init__(self):
         self.display = True
     def draw(self, screen, player):
-        myfont = pygame.font.SysFont("Helvetica", 15, bold=True)
-        letter = myfont.render("Level: " + str(player.current_level),0,(0,0,0))
+        letter = bold_font.render("Level: " + str(player.current_level),0,(0,0,0))
         screen.blit(letter,(0,15))
-        letter = myfont.render("Health: " + str(player.player_health) + "/" + str(player.player_max_health),0,(0,0,0))
+        letter = bold_font.render("Health: " + str(player.player_health) + "/" + str(player.player_max_health),0,(0,0,0))
         screen.blit(letter,(0,30))
-        letter = myfont.render("Damage: " + str(player.player_dmg),0,(0,0,0))
+        letter = bold_font.render("Damage: " + str(player.player_dmg),0,(0,0,0))
         screen.blit(letter,(0,45))
         
 
@@ -207,11 +206,10 @@ class Player():
             return
     
     def render_messages(self, screen, scroll):
-        myfont = pygame.font.SysFont("Arial", 10)
         if len(self.messages) > 4:
             self.messages = self.messages[:4]
         for x in enumerate(self.messages):
-            letter = myfont.render(x[1][0],0,(255,255,255))
+            letter = font_10.render(x[1][0],0,(255,255,255))
             screen.blit(letter, (self.player_rect.x - scroll[0] + 18, self.player_rect.y - scroll[1] + x[0]*10))
             x[1][1] -= 1
         for x in self.messages:
@@ -268,7 +266,6 @@ class Player():
         if self.player_health <= 0:
             self.messages = []
             self.messages.append(["Oh dear, you have died!", 60])
-            self.player_dmg = int(self.player_dmg / 2)
             self.level_start(self.current_level)
             play = pygame.mixer.Sound('sounds//death.wav')
             play.play()
@@ -343,9 +340,8 @@ class Red_Enemy():
             self.particles.append(Magic_Particle((self.rect.x, self.rect.y+16), (128, 0, 128)))
     
     def render_messages(self, screen, scroll):
-        myfont = pygame.font.SysFont("Arial", 10)
         for x in enumerate(self.messages):
-            letter = myfont.render(x[1][0],0,(255,255,255))
+            letter = font_10.render(x[1][0],0,(255,255,255))
             screen.blit(letter, (self.rect.x - scroll[0] + 18, self.rect.y - scroll[1] + x[0]*10))
             x[1][1] -= 1
         for x in self.messages:
@@ -441,9 +437,8 @@ class Blue_Enemy():
             self.particles.append(Magic_Particle((self.rect.x, self.rect.y+16), (128, 0, 128)))
     
     def render_messages(self, screen, scroll):
-        myfont = pygame.font.SysFont("Arial", 10)
         for x in enumerate(self.messages):
-            letter = myfont.render(x[1][0],0,(255,255,255))
+            letter = font_10.render(x[1][0],0,(255,255,255))
             screen.blit(letter, (self.rect.x - scroll[0] + 18, self.rect.y - scroll[1] + x[0]*10))
             x[1][1] -= 1
         for x in self.messages:
@@ -540,9 +535,8 @@ class Green_Enemy():
         self.wait_timer = 60
     
     def render_messages(self, screen, scroll):
-        myfont = pygame.font.SysFont("Arial", 10)
         for x in enumerate(self.messages):
-            letter = myfont.render(x[1][0],0,(255,255,255))
+            letter = font_10.render(x[1][0],0,(255,255,255))
             screen.blit(letter, (self.rect.x - scroll[0] + 18, self.rect.y - scroll[1] + x[0]*10))
             x[1][1] -= 1
         for x in self.messages:
@@ -710,7 +704,7 @@ class Magic_Particle():
 
         
 
-
+pygame.init()
 background_img = pygame.image.load("img//background.png")
 menu = pygame.image.load("img//menu.png")
 player_img = pygame.image.load("img//player.png")
@@ -739,6 +733,10 @@ quit_img = pygame.image.load("img//exit.png")
 purple_bullet_img = pygame.image.load("img//purple_bullet.png")
 page_img = pygame.image.load("img//page.png")
 
+font_10 = pygame.font.SysFont("Arial", 10)
+font_15 = pygame.font.SysFont("Arial", 15)
+bold_font = pygame.font.SysFont("Arial", 15, bold=True)
+
 sound_hit = ["sounds//classic_hurt.wav", "sounds//hit_sound.wav"]
 
 current_level = 0
@@ -746,7 +744,6 @@ level_tiles, level_items, level_enemies = [], [], []
 
 class Game():
     def  __init__(self):
-        pygame.init()
         self.level_tiles = []
         self.level_tiles_no_collide = []
         self.level_enemies = []
@@ -891,7 +888,6 @@ class Game():
                "lding will be littered with cult members. You must go quick, before their leader starts   " \
                "The Storm.                                                                                "
         count = 90 
-        myfont = pygame.font.SysFont("Arial", 15)
         repeat = True
         num_lines = 1
             
@@ -904,10 +900,10 @@ class Game():
             
 
             for x in range(num_lines):
-                letter = myfont.render(text[x*90:(x+1)*90-count],0,(255,255,255))
+                letter = font_15.render(text[x*90:(x+1)*90-count],0,(255,255,255))
                 self.screen.blit(letter,(0,60 + (x*15)))
 
-            letter = myfont.render("[Press any key to skip]",0,(255,255,255))
+            letter = font_10.render("[Press any key to skip]",0,(255,255,255))
             self.screen.blit(letter,(0,0))
 
             for event in pygame.event.get():
@@ -921,7 +917,7 @@ class Game():
         
         repeat = True
         while repeat:
-            letter = myfont.render("[Press any key to start]",0,(255,255,255))
+            letter = font_10.render("[Press any key to start]",0,(255,255,255))
             self.screen.blit(letter,(0,0))
             self.screen.blit(menu, (0,0))
 
@@ -943,7 +939,6 @@ class Game():
                "building. Luckily the final treasure chest and page are nearby, you can collect them quickly   " \
                "without him seeing you. Now go defeat him!                                                     " 
         count = 95
-        myfont = pygame.font.SysFont("Arial", 13)
         repeat = True
         num_lines = 1
         pygame.draw.rect(self.screen, (0,0,0), pygame.Rect(0,0,608,400))
@@ -957,10 +952,10 @@ class Game():
             
 
             for x in range(num_lines):
-                letter = myfont.render(text[x*95:(x+1)*95-count],0,(255,255,255))
+                letter = font_15.render(text[x*95:(x+1)*95-count],0,(255,255,255))
                 self.screen.blit(letter,(0,60 + (x*15)))
 
-            letter = myfont.render("[Press any key to skip]",0,(255,255,255))
+            letter = font_10.render("[Press any key to skip]",0,(255,255,255))
             self.screen.blit(letter,(0,0))
 
             for event in pygame.event.get():
@@ -978,7 +973,6 @@ class Game():
                "You win, you save The Earth and most of the knowledge stored in the univerisity.          " 
                                                                                               
         count = 90 
-        myfont = pygame.font.SysFont("Arial", 15)
         repeat = True
         num_lines = 1
         self.time_start = time.time() - self.time_start 
@@ -994,10 +988,10 @@ class Game():
             
 
             for x in range(num_lines):
-                letter = myfont.render(text[x*90:(x+1)*90-count],0,(255,255,255))
+                letter = font_15.render(text[x*90:(x+1)*90-count],0,(255,255,255))
                 self.screen.blit(letter,(0,60 + (x*15)))
 
-            letter = myfont.render("[Press any mouse to skip]",0,(255,255,255))
+            letter = font_10.render("[Press any mouse to skip]",0,(255,255,255))
             self.screen.blit(letter,(0,0))
 
             for event in pygame.event.get():
@@ -1010,13 +1004,13 @@ class Game():
             self.clock.tick(60)
         repeat = True
         while repeat:
-            letter = myfont.render("You completed the game in " + str(round(self.time_start, 2)) + "seconds!",0,(255,255,255))
+            letter = font_10.render("You completed the game in " + str(round(self.time_start, 2)) + "seconds!",0,(255,255,255))
             self.screen.blit(letter,(10, 150))
-            letter = myfont.render("This has been stored!",0,(255,255,255))
+            letter = font_10.render("This has been stored!",0,(255,255,255))
             self.screen.blit(letter,(10, 165))
 
             for x in enumerate(self.get_times()):
-                letter = myfont.render(x[1],0,(255,255,255))
+                letter = font_10.render(x[1],0,(255,255,255))
                 self.screen.blit(letter,(10, 180 + x[0]*15))
 
 
@@ -1060,7 +1054,6 @@ class Game():
         self.make_level_data(0)
         master_scroll = [0, 0]
         debug = False
-        myfont = pygame.font.SysFont("Arial", 10)
         hud = HUD()
         self.time_start = time.time()
         
@@ -1137,19 +1130,19 @@ class Game():
                 if count % 100 == 0:
                     print("tick", count)
                 count+=1
-                letter = myfont.render("fps: " + str(round(self.clock.get_fps(),2)),0,(0,0,0))
+                letter = font_10.render("fps: " + str(round(self.clock.get_fps(),2)),0,(0,0,0))
                 self.screen.blit(letter,(0,0))
-                letter = myfont.render("v_m: " + str(round(self.player.player_vert_mom,2)),0,(0,0,0))
+                letter = font_10.render("v_m: " + str(round(self.player.player_vert_mom,2)),0,(0,0,0))
                 self.screen.blit(letter,(0,10))
-                letter = myfont.render("h_m: " + str(round(self.player.player_horz_mom,2)),0,(0,0,0))
+                letter = font_10.render("h_m: " + str(round(self.player.player_horz_mom,2)),0,(0,0,0))
                 self.screen.blit(letter,(0,20))
-                letter = myfont.render("health: " + str(round(self.player.player_health,2)),0,(0,0,0))
+                letter = font_10.render("health: " + str(round(self.player.player_health,2)),0,(0,0,0))
                 self.screen.blit(letter,(0,30))
-                letter = myfont.render("player_level: " + str(round(self.player.current_level,2)),0,(0,0,0))
+                letter = font_10.render("player_level: " + str(round(self.player.current_level,2)),0,(0,0,0))
                 self.screen.blit(letter,(0,40))
-                letter = myfont.render("game_level: " + str(round(self.current_level,2)),0,(0,0,0))
+                letter = font_10.render("game_level: " + str(round(self.current_level,2)),0,(0,0,0))
                 self.screen.blit(letter,(0,50))
-                letter = myfont.render("items: " + str(self.player.current_items),0,(0,0,0))
+                letter = font_10.render("items: " + str(self.player.current_items),0,(0,0,0))
                 self.screen.blit(letter,(0,60))
             
             hud.draw(self.screen, self.player)
